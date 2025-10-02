@@ -1,103 +1,120 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
+import ModelView from './component/ModelView';
+import Image from 'next/image';
+import useScrollPosition from '@/hooks/useScrollPosition';
+
+const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
+    const scrollY = useScrollPosition();
+    // 1. 최소/최대 폰트 크기 정의 (px)
+    const MIN_FONT_SIZE = 40;
+    const MAX_FONT_SIZE = 100;
+
+    // 2. 폰트 크기가 변경될 스크롤 범위 정의 (px)
+    const SCROLL_RANGE = 100; // 스크롤 0px ~ 500px 사이에서 폰트 크기 변경
+
+    let newFontSize = MAX_FONT_SIZE;
+
+    if (scrollY <= SCROLL_RANGE) {
+        // 스크롤 비율 계산 (0 ~ 1)
+        const scrollRatio = scrollY / SCROLL_RANGE;
+
+        // 💡 변경된 로직: 최대 크기에서 감소분을 뺍니다.
+        // (최대 크기 - 최소 크기) * 비율 => 스크롤이 내려갈수록 0부터 (최대-최소)까지 증가
+        const sizeDecrease = (MAX_FONT_SIZE - MIN_FONT_SIZE) * scrollRatio;
+
+        // 계산된 감소분을 최대 크기에서 뺍니다.
+        newFontSize = MAX_FONT_SIZE - sizeDecrease;
+
+        // 폰트 크기를 최소/최대 범위 내로 고정
+        newFontSize = Math.min(Math.max(newFontSize, MIN_FONT_SIZE), MAX_FONT_SIZE);
+    } else {
+        // 정의된 스크롤 범위를 벗어나면 최소 크기로 고정
+        newFontSize = MIN_FONT_SIZE;
+    }
+    const isFixed = scrollY > SCROLL_RANGE;
+
+    // 계산된 폰트 크기를 정수로 만듭니다.
+    const dynamicFontSize = Math.round(newFontSize);
+
+    return (
+        <header
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: 100,
+                boxShadow: isFixed ? '0 2px 5px rgba(0,0,0,0.1)' : 'none',
+                zIndex: 1000,
+                transition: 'all 0.05s ease-out',
+                textAlign: 'center',
+                fontFamily: 'var(--font-bebas-neue)',
+                fontWeight: 'bold',
+            }}>
+            <h1 style={{ paddingTop: 5, backgroundColor: isFixed ? 'var(--background)' : 'transparent', fontSize: `${dynamicFontSize}px`, transition: 'all 0.05s ease-out' }}>{children}</h1>
+            <div
+                style={{
+                    height: '2px', // 선의 두께
+                    backgroundColor: '#333', // 선의 색상
+                    margin: '0 auto 0 auto', // 상단 여백 및 중앙 정렬
+
+                    // 💡 애니메이션 핵심 로직:
+                    // isFixed가 true면 width 100%, 아니면 0%
+                    width: isFixed ? '100%' : '0%',
+                    opacity: isFixed ? 1 : 0, // isFixed가 true면 나타나고 아니면 투명하게
+
+                    // 💡 너비와 투명도 변화에 transition 적용
+                    transition: 'width 0.5s ease-out, opacity 0.5s ease-out',
+
+                    // (선택 사항) 중앙에서 양옆으로 확장되는 것처럼 보이게 하려면 transform 사용
+                    // transform: isFixed ? 'scaleX(1)' : 'scaleX(0)',
+                    // transformOrigin: 'center', // 중앙을 기준으로 확장
+                }}
+            />
+        </header>
+    );
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    const models = ['FuzzFactory', 'BigMuff'];
+    const [resetToggle, setResetToggle] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    const onResetClicked = () => {
+        setResetToggle((prev) => !prev);
+        console.log('clicked!');
+    };
+
+    return (
+        <div style={{ flex: 1, justifyContent: 'center', paddingTop: 155 }}>
+            <DynamicTitle>Swanwoo Pedals</DynamicTitle>
+            <div style={{ paddingBottom: 0, fontSize: 30, fontFamily: 'var(--font-bebas-neue)', fontWeight: 'bold', textAlign: 'center' }}>
+                <a style={{ display: 'inline-block' }} href='https://www.instagram.com/swanwoo_pedals/' target='_blank'>
+                    <Image width={40} height={40} src='/instagram.webp' alt='instagram' />
+                </a>
+            </div>
+            <div style={{ boxShadow: '0px 10px 10px 0px #FFFFFF', flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, paddingBottom: 20 }}>
+                <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'DIY Effects Pedals'}</div>
+                <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'Custom Illustrating, Hand-Wiring'}</div>
+                <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'Base In Incheon, Korea'}</div>
+            </div>
+            {/* <div style={{ flex: 1, height: 2, backgroundColor: '#333', margin: '0px 30px', marginBottom: 30 }} /> */}
+            <div style={{ backgroundColor: 'black', padding: '30px 30px', width: '100vw', height: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '500px 500px 500px', gap: 30, borderBottom: 'solid 2px grey' }}>
+                <div style={{ flex: 1 }}>
+                    <ModelView resetToggle={resetToggle} name={models[1]} />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <ModelView resetToggle={resetToggle} name={models[0]} />
+                </div>
+                <div style={{ flex: 1 }}></div>
+            </div>
+            {/* <div style={{ position: 'fixed', bottom: 10, right: 10 }} onClick={() => onResetClicked()}>
+                {'Reset View'}
+            </div> */}
+            <div style={{ backgroundColor: 'black', textAlign: 'center', fontFamily: 'var(--font-bebas-neue)', fontSize: 60, padding: 100 }}>{'More to come...'}</div>
+            <footer>
+                <div style={{ padding: 16, fontSize: 14, textAlign: 'center', color: 'grey' }}>{'Copyright 2025. @swanwoo_pedals All rights reserved.'}</div>
+            </footer>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
