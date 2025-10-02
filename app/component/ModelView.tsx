@@ -17,6 +17,12 @@ interface State {
     hasError: boolean;
 }
 
+interface Spec {
+    title: string;
+    date: string;
+    spec: string[];
+}
+
 class ErrorBoundary extends Component<Props, State> {
     public state: State = {
         hasError: false,
@@ -39,20 +45,22 @@ class ErrorBoundary extends Component<Props, State> {
     }
 }
 
-function Model({ name, group, isHover }: { name: string; group: React.RefObject<THREE.Group>; isHover: boolean }) {
+function Model({ name, group, isHover }: { name: string; group: React.RefObject<THREE.Group | null>; isHover: boolean }) {
     const base = `/swanwoo_pedals_obj`;
     const deg90 = Math.PI / 2;
-    const light = useRef();
+    const light = useRef<THREE.SpotLight | null>(null);
     // 모델별 쿼리로 r3f/loader 캐시 분리
     useFrame((state, delta) => {
-        if (isHover) {
-            easing.dampE(group.current.rotation, [state.pointer.y * (Math.PI / 3) + 0.4, (-state.pointer.x * Math.PI) / 3, 0], 0.3, delta);
-            easing.damp3(group.current.position, [0, 0, -(1 - Math.abs(state.pointer.x)) / 2], 1, delta);
-            easing.damp3(light.current.position, [state.pointer.x * 3, 2.5, -state.pointer.y + 1], 0.2, delta);
-        } else {
-            easing.dampE(group.current.rotation, [0, 0, 0], 0.3, delta);
-            easing.damp3(group.current.position, [0, 0, 0], 0.3, delta);
-            easing.damp3(light.current.position, [0, 4, 2], 0.2, delta);
+        if (group && light && group.current && light.current) {
+            if (isHover) {
+                easing.dampE(group.current.rotation, [state.pointer.y * (Math.PI / 3) + 0.4, (-state.pointer.x * Math.PI) / 3, 0], 0.3, delta);
+                easing.damp3(group.current.position, [0, 0, -(1 - Math.abs(state.pointer.x)) / 2], 1, delta);
+                easing.damp3(light.current.position, [state.pointer.x * 3, 2.5, -state.pointer.y + 1], 0.2, delta);
+            } else {
+                easing.dampE(group.current.rotation, [0, 0, 0], 0.3, delta);
+                easing.damp3(group.current.position, [0, 0, 0], 0.3, delta);
+                easing.damp3(light.current.position, [0, 4, 2], 0.2, delta);
+            }
         }
     });
 
@@ -67,7 +75,7 @@ function Model({ name, group, isHover }: { name: string; group: React.RefObject<
 }
 
 export default function ModelView({ name, resetToggle }: { name: string; resetToggle: boolean }) {
-    const [specJson, setSpecJson] = useState({});
+    const [specJson, setSpecJson] = useState<Spec | null>(null);
     const [isHover, setIsHover] = useState(false);
     const group = useRef<THREE.Group>(null);
     const base = `/swanwoo_pedals_obj`;
@@ -101,7 +109,7 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
     const handleMouseLeave = useCallback(() => {
         console.log('mouse leave' + name);
         setIsHover(false);
-    }, [setIsHover]);
+    }, [name]);
 
     return (
         <div style={{ flex: 1, height: 450 }}>
