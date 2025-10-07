@@ -3,23 +3,39 @@ import { useState, useEffect } from 'react';
 import ModelView from './component/ModelView';
 import Image from 'next/image';
 import useScrollPosition from '@/hooks/useScrollPosition';
+import styles from './page.module.css';
 
 const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
     const scrollY = useScrollPosition();
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Set initial value
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // 1. 최소/최대 폰트 크기 정의 (px)
     const MIN_FONT_SIZE = 40;
     const MAX_FONT_SIZE = 100;
 
     // 2. 폰트 크기가 변경될 스크롤 범위 정의 (px)
-    const SCROLL_RANGE = 100; // 스크롤 0px ~ 500px 사이에서 폰트 크기 변경
+    let scrollRange = 100; // 스크롤 0px ~ 500px 사이에서 폰트 크기 변경
 
     let newFontSize = MAX_FONT_SIZE;
 
-    if (scrollY <= SCROLL_RANGE) {
+    if (isMobile) {
+        newFontSize = 60;
+        scrollRange = 20;
+    } else if (scrollY <= scrollRange) {
         // 스크롤 비율 계산 (0 ~ 1)
-        const scrollRatio = scrollY / SCROLL_RANGE;
+        const scrollRatio = scrollY / scrollRange;
 
-        // 💡 변경된 로직: 최대 크기에서 감소분을 뺍니다.
+        // 💡 변경된 로직: 최대 크기에서 감소분을 읍니다.
         // (최대 크기 - 최소 크기) * 비율 => 스크롤이 내려갈수록 0부터 (최대-최소)까지 증가
         const sizeDecrease = (MAX_FONT_SIZE - MIN_FONT_SIZE) * scrollRatio;
 
@@ -32,7 +48,7 @@ const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
         // 정의된 스크롤 범위를 벗어나면 최소 크기로 고정
         newFontSize = MIN_FONT_SIZE;
     }
-    const isFixed = scrollY > SCROLL_RANGE;
+    const isFixed = scrollY > scrollRange;
 
     // 계산된 폰트 크기를 정수로 만듭니다.
     const dynamicFontSize = Math.round(newFontSize);
@@ -52,7 +68,7 @@ const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
                 fontFamily: 'var(--font-bebas-neue)',
                 fontWeight: 'bold',
             }}>
-            <h1 style={{ paddingTop: 5, backgroundColor: isFixed ? 'var(--background)' : 'transparent', fontSize: `${dynamicFontSize}px`, transition: 'all 0.05s ease-out' }}>{children}</h1>
+            <h1 style={{ paddingTop: 5, backgroundColor: isFixed ? 'var(--background)' : 'transparent', fontSize: `${dynamicFontSize}px`, transition: isMobile ? 'none' : 'all 0.05s ease-out' }}>{children}</h1>
             <div
                 style={{
                     height: '2px', // 선의 두께
@@ -82,35 +98,30 @@ export default function Home() {
 
     const onResetClicked = () => {
         setResetToggle((prev) => !prev);
-        console.log('clicked!');
     };
 
     return (
-        <div style={{ flex: 1, justifyContent: 'center', paddingTop: 155 }}>
+        <div className={styles.container}>
             <DynamicTitle>Swanwoo Pedals</DynamicTitle>
             <div style={{ paddingBottom: 0, fontSize: 30, fontFamily: 'var(--font-bebas-neue)', fontWeight: 'bold', textAlign: 'center' }}>
                 <a style={{ display: 'inline-block' }} href='https://www.instagram.com/swanwoo_pedals/' target='_blank'>
                     <Image width={40} height={40} src='/instagram.webp' alt='instagram' />
                 </a>
             </div>
-            <div style={{ boxShadow: '0px 10px 10px 0px #FFFFFF', flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, paddingBottom: 20 }}>
+            <div style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, paddingBottom: 20 }}>
                 <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'DIY Effects Pedals'}</div>
                 <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'Custom Illustrating, Hand-Wiring'}</div>
                 <div style={{ fontSize: 25, fontFamily: 'var(--font-bebas-neue)', color: 'grey', textAlign: 'center' }}>{'Base In Incheon, Korea'}</div>
             </div>
-            {/* <div style={{ flex: 1, height: 2, backgroundColor: '#333', margin: '0px 30px', marginBottom: 30 }} /> */}
-            <div style={{ backgroundColor: 'black', padding: '30px 30px', width: '100vw', height: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '500px 500px 500px', gap: 30, borderBottom: 'solid 2px grey' }}>
-                <div style={{ flex: 1 }}>
-                    <ModelView resetToggle={resetToggle} name={models[1]} />
+            <div className={styles.modelContainer}>
+                <div className={styles.modelView}>
+                    <ModelView name={models[0]} resetToggle={resetToggle} />
                 </div>
-                <div style={{ flex: 1 }}>
-                    <ModelView resetToggle={resetToggle} name={models[0]} />
+                <div className={styles.modelView}>
+                    <ModelView name={models[1]} resetToggle={resetToggle} />
                 </div>
-                <div style={{ flex: 1 }}></div>
+                <div className={styles.modelView}></div>
             </div>
-            {/* <div style={{ position: 'fixed', bottom: 10, right: 10 }} onClick={() => onResetClicked()}>
-                {'Reset View'}
-            </div> */}
             <div style={{ backgroundColor: 'black', textAlign: 'center', fontFamily: 'var(--font-bebas-neue)', fontSize: 60, padding: 100 }}>{'More to come...'}</div>
             <footer>
                 <div style={{ padding: 16, fontSize: 14, textAlign: 'center', color: 'grey' }}>{'Copyright 2025. @swanwoo_pedals All rights reserved.'}</div>

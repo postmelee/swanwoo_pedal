@@ -1,13 +1,11 @@
 'use client';
 
 import * as THREE from 'three';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import React, { Suspense, Component, ErrorInfo, ReactNode, useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
-import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { easing, geometry } from 'maath';
+import { easing } from 'maath';
 
 interface Props {
     children: ReactNode;
@@ -112,7 +110,7 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
     }, [name]);
 
     return (
-        <div style={{ flex: 1, height: 450 }}>
+        <div style={{ flex: 1, width: 'auto', height: 450 }}>
             <div style={{ flex: 1, textAlign: 'center', fontSize: 37, fontFamily: 'var(--font-bebas-neue' }}>{specJson?.title}</div>
             <div style={{ flex: 1, textAlign: 'center', color: 'grey', fontSize: 18, fontFamily: 'var(--font-bebas-neue' }}>{specJson?.date}</div>
             <ErrorBoundary>
