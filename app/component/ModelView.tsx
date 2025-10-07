@@ -1,11 +1,13 @@
 'use client';
 
 import * as THREE from 'three';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import React, { Suspense, Component, ErrorInfo, ReactNode, useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame, extend } from '@react-three/fiber';
+import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { easing } from 'maath';
+import { easing, geometry } from 'maath';
 
 interface Props {
     children: ReactNode;
@@ -110,12 +112,14 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
     }, [name]);
 
     return (
-        <div style={{ flex: 1, width: 'auto', height: 450 }}>
-            <div style={{ flex: 1, textAlign: 'center', fontSize: 37, fontFamily: 'var(--font-bebas-neue' }}>{specJson?.title}</div>
-            <div style={{ flex: 1, textAlign: 'center', color: 'grey', fontSize: 18, fontFamily: 'var(--font-bebas-neue' }}>{specJson?.date}</div>
+        <div style={{ position: 'relative', flex: 1, width: '100%', height: '100%' }}>
+            <div style={{ position: 'absolute', left: '50%', transform: 'translate(-50%, 0%)', width: '100%' }}>
+                <div style={{ flex: 1, textAlign: 'center', fontSize: 37, fontFamily: 'var(--font-bebas-neue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{specJson?.title}</div>
+                <div style={{ flex: 1, textAlign: 'center', color: 'grey', fontSize: 18, fontFamily: 'var(--font-bebas-neue)' }}>{specJson?.date}</div>
+            </div>
             <ErrorBoundary>
                 <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading 3D Model...</div>}>
-                    <Canvas key={name} onMouseEnter={() => setIsHover(true)} onMouseLeave={handleMouseLeave} camera={{ position: [0, 2, 3], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+                    <Canvas key={name} onMouseEnter={() => setIsHover(true)} onMouseLeave={handleMouseLeave} camera={{ position: [0, 2, 3], fov: 50 }} style={{ height: 500 }}>
                         {/* 조명 추가 */}
                         <ambientLight intensity={0.5} />
                         {/* 환경 조명 */}
@@ -126,25 +130,27 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
                         {/* 카메라 컨트롤 */}
                         <OrbitControls ref={controlsRef} enablePan={false} enableZoom={false} enableRotate={false} autoRotate={false} autoRotateSpeed={1} maxDistance={3.5} minDistance={2.5} />
                     </Canvas>
+                    <div style={{ height: 100 }}>
+                        <div
+                            style={{
+                                height: 4,
+                                backgroundColor: 'grey',
+                                width: isHover ? '100%' : '0%',
+                                opacity: isHover ? 1 : 0, // isFixed가 true면 나타나고 아니면 투명하게
+
+                                // 💡 너비와 투명도 변화에 transition 적용
+                                transition: 'width 0.5s ease-out, opacity 0.3s ease-out',
+                            }}
+                        />
+                        <div style={{ transition: 'color 0.5s ease-out', color: isHover ? 'white' : 'grey', fontSize: 26, fontFamily: 'var(--font-bebas-neue)' }}>{name}</div>
+                        {specJson?.spec?.map((text) => (
+                            <div style={{ color: 'grey' }} key={text}>
+                                {text}
+                            </div>
+                        ))}
+                    </div>
                 </Suspense>
             </ErrorBoundary>
-            <div
-                style={{
-                    height: 4,
-                    backgroundColor: 'grey',
-                    width: isHover ? '100%' : '0%',
-                    opacity: isHover ? 1 : 0, // isFixed가 true면 나타나고 아니면 투명하게
-
-                    // 💡 너비와 투명도 변화에 transition 적용
-                    transition: 'width 0.5s ease-out, opacity 0.3s ease-out',
-                }}
-            />
-            <div style={{ transition: 'color 0.5s ease-out', color: isHover ? 'white' : 'grey', fontSize: 26, fontFamily: 'var(--font-bebas-neue)' }}>{name}</div>
-            {specJson?.spec?.map((text) => (
-                <div style={{ color: 'grey' }} key={text}>
-                    {text}
-                </div>
-            ))}
         </div>
     );
 }
