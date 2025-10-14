@@ -61,7 +61,6 @@ const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
                 left: 0,
                 width: '100%',
                 height: 100,
-                boxShadow: isFixed ? '0 2px 5px rgba(0,0,0,0.1)' : 'none',
                 zIndex: 1000,
                 transition: 'all 0.05s ease-out',
                 textAlign: 'center',

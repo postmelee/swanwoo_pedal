@@ -114,7 +114,7 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
     return (
         <div style={{ position: 'relative', flex: 1, width: '100%', height: '100%' }}>
             <div style={{ position: 'absolute', left: '50%', transform: 'translate(-50%, 0%)', width: '100%' }}>
-                <div style={{ flex: 1, textAlign: 'center', fontSize: 37, fontFamily: 'var(--font-bebas-neue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{specJson?.title}</div>
+                <div style={{ flex: 1, textAlign: 'center', color: 'white', fontSize: 37, fontFamily: 'var(--font-bebas-neue)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{specJson?.title}</div>
                 <div style={{ flex: 1, textAlign: 'center', color: 'grey', fontSize: 18, fontFamily: 'var(--font-bebas-neue)' }}>{specJson?.date}</div>
             </div>
             <ErrorBoundary>
