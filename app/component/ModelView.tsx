@@ -8,7 +8,7 @@ import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { easing, geometry } from 'maath';
-
+import useIsMobile from '@/hooks/useIsMobile';
 interface Props {
     children: ReactNode;
 }
@@ -46,6 +46,7 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 function Model({ name, group, isHover }: { name: string; group: React.RefObject<THREE.Group | null>; isHover: boolean }) {
+    const isMobile = useIsMobile();
     const base = `/swanwoo_pedals_obj`;
     const deg90 = Math.PI / 2;
     const light = useRef<THREE.SpotLight | null>(null);
@@ -130,7 +131,7 @@ export default function ModelView({ name, resetToggle }: { name: string; resetTo
                         {/* 카메라 컨트롤 */}
                         <OrbitControls ref={controlsRef} enablePan={false} enableZoom={false} enableRotate={false} autoRotate={false} autoRotateSpeed={1} maxDistance={3.5} minDistance={2.5} />
                     </Canvas>
-                    <div style={{ height: 100 }}>
+                    <div>
                         <div
                             style={{
                                 height: 4,
