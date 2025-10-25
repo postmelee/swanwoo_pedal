@@ -92,7 +92,7 @@ const DynamicTitle = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function Home() {
-    const models = ['FuzzFactory', 'BigMuff'];
+    const models = ['FuzzFactory', 'BigMuff', 'KillSwitch'];
     const [resetToggle, setResetToggle] = useState(false);
 
     const onResetClicked = () => {
@@ -119,7 +119,9 @@ export default function Home() {
                 <div className={styles.modelView}>
                     <ModelView name={models[1]} resetToggle={resetToggle} />
                 </div>
-                <div className={styles.modelView}></div>
+                <div className={styles.modelView}>
+                    <ModelView name={models[2]} resetToggle={resetToggle} />
+                </div>
             </div>
             <div style={{ backgroundColor: 'black', textAlign: 'center', fontFamily: 'var(--font-bebas-neue)', fontSize: 60, padding: 100 }}>{'More to come...'}</div>
             <footer>
